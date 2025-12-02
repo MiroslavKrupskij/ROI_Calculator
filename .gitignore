@@ -5,8 +5,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-data/scenarios.json
-
 # Environment files
 .env
 .env.local

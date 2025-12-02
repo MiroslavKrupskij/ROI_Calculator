@@ -14,6 +14,7 @@ const DATA_FILE = path.join(__dirname, 'data', 'scenarios.json');
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// === Курси валют з НБУ ===
 app.get('/api/rates', async (req, res) => {
   try {
     const response = await fetch(
@@ -52,6 +53,7 @@ app.get('/api/rates', async (req, res) => {
   }
 });
 
+// === Робота з файлами сценаріїв ===
 async function readScenarios() {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf-8');
@@ -71,15 +73,29 @@ async function writeScenarios(scenarios) {
 }
 
 app.get('/api/scenarios', async (req, res) => {
+  const clientId = req.query.clientId;
   const scenarios = await readScenarios();
-  res.json(scenarios);
+
+  if (!clientId) {
+    return res.json([]);
+  }
+
+  const filtered = scenarios.filter((s) => s.clientId === clientId);
+  res.json(filtered);
 });
 
 app.post('/api/scenarios', async (req, res) => {
+  const clientId = req.query.clientId;
+
+  if (!clientId) {
+    return res.status(400).json({ message: 'clientId обовʼязковий' });
+  }
+
   const scenarios = await readScenarios();
 
   const newScenario = {
     id: Date.now().toString(),
+    clientId, // привʼязка до браузера
     createdAt: new Date().toISOString(),
     ...req.body
   };
@@ -92,12 +108,25 @@ app.post('/api/scenarios', async (req, res) => {
 
 app.delete('/api/scenarios/:id', async (req, res) => {
   const { id } = req.params;
-  const scenarios = await readScenarios();
-  const filtered = scenarios.filter((s) => s.id !== id);
+  const clientId = req.query.clientId;
 
-  if (filtered.length === scenarios.length) {
+  if (!clientId) {
+    return res.status(400).json({ message: 'clientId обовʼязковий' });
+  }
+
+  const scenarios = await readScenarios();
+
+  const existsForClient = scenarios.some(
+    (s) => s.id === id && s.clientId === clientId
+  );
+
+  if (!existsForClient) {
     return res.status(404).json({ message: 'Сценарій не знайдено' });
   }
+
+  const filtered = scenarios.filter(
+    (s) => !(s.id === id && s.clientId === clientId)
+  );
 
   await writeScenarios(filtered);
   res.json({ message: 'Сценарій видалено' });
