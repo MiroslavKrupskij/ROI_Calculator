@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="uk">
+    <head>
+        <meta charset="UTF-8" />
+        <title>ROI-калькулятор</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="stylesheet" href="./styles.css" />
+    </head>
+    <body>
+        <div id="app">
+            <header class="app-header">
+                <div class="app-header-main">
+                    <h1>ROI-калькулятор окупності інвестицій у нерухомість</h1>
+                </div>
+                <div class="currency-switcher">
+                    <span>Валюта:</span>
+                    <button type="button" class="currency-btn currency-btn--active" data-currency="UAH">UAH</button>
+                    <button type="button" class="currency-btn" data-currency="USD">USD</button>
+                    <button type="button" class="currency-btn" data-currency="EUR">EUR</button>
+                </div>
+            </header>
+
+            <main class="app-main">
+            <!-- Ліва частина: форма -->
+                <section class="form-section">
+                    <h2>Введення даних</h2>
+                    <form id="investment-form">
+                        <!-- Блок 1: основні дані -->
+                        <fieldset class="form-block">
+                            <legend>Основні дані</legend>
+
+                            <label class="form-field">
+                                <span>Ціна купівлі, грн</span>
+                                <input
+                                    type="number"
+                                    id="purchasePrice"
+                                    min="0"
+                                    step="1000"
+                                    required
+                                />
+                            </label>
+
+                            <label class="form-field">
+                                <span>Власні кошти (перший внесок), грн</span>
+                                <input
+                                    type="number"
+                                    id="ownMoney"
+                                    min="0"
+                                    step="1000"
+                                    required
+                                />
+                            </label>
+
+                            <label class="form-field">
+                            <span>Додаткові витрати (ремонт, нотаріус тощо), грн</span>
+                            <input
+                                type="number"
+                                id="extraCosts"
+                                min="0"
+                                step="1000"
+                                value="0"
+                            />
+                            </label>
+                        </fieldset>
+
+                        <!-- Блок 2: кредит -->
+                        <fieldset class="form-block">
+                            <legend>Кредит / іпотека</legend>
+
+                            <label class="form-checkbox">
+                            <input type="checkbox" id="hasLoan" />
+                            <span>Є кредит</span>
+                            </label>
+
+                            <label class="form-field">
+                                <span>Сума кредиту, грн</span>
+                                <input
+                                    type="number"
+                                    id="loanAmount"
+                                    min="0"
+                                    step="1000"
+                                    disabled
+                                />
+                            </label>
+
+                            <label class="form-field">
+                                <span>Річна ставка, %</span>
+                                <input
+                                    type="number"
+                                    id="loanAnnualRate"
+                                    min="0"
+                                    step="0.1"
+                                    disabled
+                                />
+                            </label>
+
+                            <label class="form-field">
+                                <span>Строк кредиту, років</span>
+                                <input
+                                    type="number"
+                                    id="loanYears"
+                                    min="1"
+                                    step="1"
+                                    disabled
+                                />
+                            </label>
+
+                            <label class="form-checkbox">
+                                <input type="checkbox" id="useManualLoanPayment" disabled />
+                                <span>Ввести щомісячний платіж вручну</span>
+                            </label>
+
+                            <label class="form-field">
+                                <span>Щомісячний платіж, грн</span>
+                                <input
+                                    type="number"
+                                    id="loanMonthlyPayment"
+                                    min="0"
+                                    step="100"
+                                    disabled
+                                />
+                            </label>
+                        </fieldset>
+
+                        <!-- Блок 3: оренда та витрати -->
+                        <fieldset class="form-block">
+                            <legend>Оренда та витрати</legend>
+
+                            <label class="form-field">
+                                <span>Місячна орендна плата, грн</span>
+                                <input
+                                    type="number"
+                                    id="rentPerMonth"
+                                    min="0"
+                                    step="100"
+                                    required
+                                />
+                            </label>
+
+                            <label class="form-field">
+                                <span>Місячні витрати власника (комунальні, ремонт, управління), грн</span>
+                                <input
+                                    type="number"
+                                    id="monthlyExpenses"
+                                    min="0"
+                                    step="100"
+                                    value="0"
+                                />
+                            </label>
+
+                            <label class="form-field">
+                                <span>Термін інвестиції, років</span>
+                                <input
+                                    type="number"
+                                    id="years"
+                                    min="1"
+                                    max="50"
+                                    step="1"
+                                    value="10"
+                                    required
+                                />
+                            </label>
+
+                            <label class="form-field">
+                                <span>Назва сценарію (опціонально)</span>
+                                <input
+                                    type="text"
+                                    id="scenarioName"
+                                    placeholder="Квартира в центрі"
+                                />
+                            </label>
+                        </fieldset>
+
+                        <div class="form-actions">
+                            <button type="submit" id="calculateBtn">Розрахувати</button>
+                            <button type="button" id="resetBtn">Скинути</button>
+                            <button type="button" id="saveScenarioBtn" disabled>Зберегти сценарій</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="results-section">
+                    <h2>Результати</h2>
+                    <div id="results">
+                        <div id="summary-cards" class="summary-cards">
+                            <!-- Картки з основними показниками -->
+                        </div>
+
+                        <div id="text-summary" class="text-summary">
+                            <p>
+                                Поки що немає результатів. Заповніть форму й натисніть
+                                <strong>"Розрахувати"</strong>.
+                            </p>
+                        </div>
+
+                        <h3>Графік накопиченого доходу</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="incomeChart" height="140"></canvas>
+                        </div>
+
+                        <h3>Таблиця накопичень по роках</h3>
+                        <div class="table-wrapper">
+                            <table id="yearly-table">
+                                <thead>
+                                    <tr>
+                                    <th>Рік</th>
+                                    <th>Чистий дохід за рік, грн</th>
+                                    <th>Накопичений дохід, грн</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Рядки таблиці -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="export-wrapper">
+                            <button type="button" id="exportCsvBtn">
+                                Експорт таблиці
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3>Збережені сценарії</h3>
+                    <div id="scenarios-list" class="scenarios-list">
+                        <!-- Список збережених операцій -->
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script type="module" src="./js/main.js"></script>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "roi",
+  "version": "1.0.0",
+  "description": "Калькулятор для розрахунку окупності інвестицій у нерухомість",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "sass": "sass scss/main.scss public/styles.css --watch",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.2.0",
+    "jest": "^30.2.0",
+    "sass": "^1.94.2"
+  }
+}

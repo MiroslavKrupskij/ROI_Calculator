@@ -1,0 +1,19 @@
+[
+  {
+    "id": "1764515272163",
+    "createdAt": "2025-11-30T15:07:52.163Z",
+    "name": "Квартира в центрі Одеси",
+    "purchasePrice": 1800000,
+    "ownMoney": 600000,
+    "extraCosts": 200000,
+    "hasLoan": true,
+    "loanAmount": 1200000,
+    "loanAnnualRate": 12,
+    "loanYears": 20,
+    "useManualLoanPayment": false,
+    "loanMonthlyPayment": 0,
+    "rentPerMonth": 30000,
+    "monthlyExpenses": 5000,
+    "years": 15
+  }
+]
