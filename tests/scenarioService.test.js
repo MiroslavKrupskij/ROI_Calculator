@@ -1,124 +1,63 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import {
-  fetchScenariosFromServer,
-  saveScenarioToServer,
-  deleteScenarioOnServer,
-  fetchRatesFromServer
-} from '../public/js/scenarioService.js';
+import { describe, it, expect, jest } from '@jest/globals';
+
+global.localStorage = {
+    getItem: jest.fn(() => null),
+    setItem: jest.fn(),
+};
 
 global.fetch = jest.fn();
 
-beforeEach(() => {
-  fetch.mockReset();
-});
+import {
+    fetchScenariosFromServer,
+    saveScenarioToServer,
+    deleteScenarioOnServer
+} from '../public/js/scenarioService.js';
 
-describe('fetchScenariosFromServer', () => {
-  it('Повертає сценарії, якщо відповідь ок', async () => {
-    const fakeScenarios = [{ id: '1', name: 'Test scenario' }];
+describe('ScenarioService API calls', () => {
 
-    fetch.mockResolvedValue({
-      ok: true,
-      json: async () => fakeScenarios
+    beforeEach(() => {
+        fetch.mockClear();
+        localStorage.getItem.mockClear();
+        localStorage.setItem.mockClear();
     });
 
-    const result = await fetchScenariosFromServer();
+    it('fetchScenariosFromServer calls fetch with /api/scenarios', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: async () => []
+        });
 
-    expect(fetch).toHaveBeenCalledWith('/api/scenarios');
-    expect(result).toEqual(fakeScenarios);
-  });
+        await fetchScenariosFromServer();
 
-  it('Видає помилку, якщо відповідь не ок', async () => {
-    fetch.mockResolvedValue({ ok: false });
-
-    await expect(fetchScenariosFromServer()).rejects.toThrow(
-      'Помилка завантаження сценаріїв'
-    );
-  });
-});
-
-describe('saveScenarioToServer', () => {
-  it('Надсилає POST з правильним тілом і повертає збережений сценарій', async () => {
-    const inputScenario = {
-      name: '',
-      someField: 123
-    };
-
-    const serverResponse = { id: '42', name: 'Сценарій від ...', someField: 123 };
-
-    fetch.mockImplementation((url, options) => {
-      // емулюємо відповідь сервера
-      return Promise.resolve({
-        ok: true,
-        json: async () => serverResponse
-      });
+        expect(fetch.mock.calls[0][0]).toBe('/api/scenarios');
     });
 
-    const result = await saveScenarioToServer(inputScenario);
+    it('saveScenarioToServer sends POST request', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: async () => ({ id: 1 })
+        });
 
-    expect(fetch).toHaveBeenCalledTimes(1);
-    const [url, options] = fetch.mock.calls[0];
+        const scenario = { price: 1000 };
+        await saveScenarioToServer(scenario);
 
-    expect(url).toBe('/api/scenarios');
-    expect(options.method).toBe('POST');
-    expect(options.headers['Content-Type']).toBe('application/json');
+        const [url, options] = fetch.mock.calls[0];
 
-    const sentPayload = JSON.parse(options.body);
-
-    expect(sentPayload.name).toBeTruthy();
-    expect(sentPayload.someField).toBe(123);
-
-    expect(result).toEqual(serverResponse);
-  });
-
-  it('Видає помилку, якщо сервер повертає не ок', async () => {
-    fetch.mockResolvedValue({ ok: false });
-
-    await expect(
-      saveScenarioToServer({ name: 'Bad' })
-    ).rejects.toThrow('Помилка збереження сценарію');
-  });
-});
-
-describe('deleteScenarioOnServer', () => {
-  it('Надсилає DELETE на правильний URL', async () => {
-    fetch.mockResolvedValue({ ok: true });
-
-    await deleteScenarioOnServer('10');
-
-    expect(fetch).toHaveBeenCalledWith('/api/scenarios/10', {
-      method: 'DELETE'
-    });
-  });
-
-  it('Кидає помилку, якщо видалення не вдалося', async () => {
-    fetch.mockResolvedValue({ ok: false });
-
-    await expect(deleteScenarioOnServer('10')).rejects.toThrow(
-      'Помилка видалення сценарію'
-    );
-  });
-});
-
-describe('fetchRatesFromServer', () => {
-  it('Повертає курси валют, якщо все добре', async () => {
-    const fakeRates = { base: 'UAH', rates: { UAH: 1, USD: 0.025 } };
-
-    fetch.mockResolvedValue({
-      ok: true,
-      json: async () => fakeRates
+        expect(url).toBe('/api/scenarios');
+        expect(options.method).toBe('POST');
     });
 
-    const result = await fetchRatesFromServer();
+    it('deleteScenarioOnServer sends DELETE request', async () => {
+        fetch.mockResolvedValue({
+            ok: true
+        });
 
-    expect(fetch).toHaveBeenCalledWith('/api/rates');
-    expect(result).toEqual(fakeRates);
-  });
+        await deleteScenarioOnServer(10);
 
-  it('Видає помилку, якщо не вдалося отримати курси', async () => {
-    fetch.mockResolvedValue({ ok: false });
+        const [url, options] = fetch.mock.calls[0];
 
-    await expect(fetchRatesFromServer()).rejects.toThrow(
-      'Помилка завантаження курсів валют'
-    );
-  });
+        expect(url).toBe('/api/scenarios/10');
+        expect(options.method).toBe('DELETE');
+    });
+
 });

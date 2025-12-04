@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import {
   calculateLoanMonthlyPayment,
   calculateScenario
-} from '../public/js/roiCalculator.js';
+} from '../public/js/calculator.js';
 
 describe('calculateLoanMonthlyPayment', () => {
   it('Рахує щомісячний платіж при ненульовій ставці', () => {

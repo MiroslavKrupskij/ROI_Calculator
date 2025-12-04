@@ -1,20 +1,42 @@
 const API_SCENARIOS = '/api/scenarios';
 const API_RATES = '/api/rates';
 
-let clientId = localStorage.getItem('roi_client_id');
+let clientId = null;
 
-if (!clientId) {
-    if (crypto.randomUUID) {
-        clientId = crypto.randomUUID();
-    } else {
-        clientId = 'client-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+function getClientId() {
+    if (clientId !== null) {
+        return clientId;
     }
-    localStorage.setItem('roi_client_id', clientId);
+
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+        clientId = null;
+        return clientId;
+    }
+
+    let id = localStorage.getItem('roi_client_id');
+
+    if (!id) {
+        if (window.crypto && window.crypto.randomUUID) {
+            id = window.crypto.randomUUID();
+        } else {
+            id = 'client-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+        }
+        localStorage.setItem('roi_client_id', id);
+    }
+
+    clientId = id;
+    return clientId;
 }
 
 function withClientId(url) {
+    const id = getClientId();
+
+    if (!id) {
+        return url;
+    }
+
     const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}clientId=${encodeURIComponent(clientId)}`;
+    return `${url}${separator}clientId=${encodeURIComponent(id)}`;
 }
 
 export async function fetchScenariosFromServer() {
